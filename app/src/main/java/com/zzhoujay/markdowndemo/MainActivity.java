@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
         assert mTextView != null;
         mTextView.setMovementMethod(LongPressLinkMovementMethod.getInstance());
 
-        setText(R.raw.hello);
+        setText(R.raw.cys);
     }
 
     private void setText(int resId) {
@@ -78,6 +78,12 @@ public class MainActivity extends Activity {
         });
     }
 
+    /**
+     * 解析url图片
+     * @param url
+     * @return
+     * @throws IOException
+     */
     public static Drawable drawableFromUrl(String url) throws IOException {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -94,7 +100,12 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 0x1,        0, "Night mode");
+        int mode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (mode == Configuration.UI_MODE_NIGHT_NO) {// 当前是白天模式
+            menu.add(0, 0x1,        0, "Night Mode");
+        }else{
+            menu.add(0, 0x1,        0, "Light Mode");
+        }
         SubMenu sub = menu.addSubMenu(0, 0x2, 0, "Documents");
         sub.add(0, R.raw.dy,       0, "dy");
         sub.add(0, R.raw.hello,    0, "hello");
@@ -112,8 +123,20 @@ public class MainActivity extends Activity {
             setText(item.getItemId());
             return true;
         } else if (item.getItemId() == 0x1) {
-            getResources().getConfiguration().uiMode |= Configuration.UI_MODE_NIGHT_YES;
-            getResources().getConfiguration().uiMode &= ~Configuration.UI_MODE_NIGHT_NO;
+//            getResources().getConfiguration().uiMode |= Configuration.UI_MODE_NIGHT_YES; // 开启暗色主题
+//            getResources().getConfiguration().uiMode &= ~Configuration.UI_MODE_NIGHT_NO; // 去掉暗色主题的关闭
+//            getResources().updateConfiguration(getResources().getConfiguration(), getResources().getDisplayMetrics());
+            int mode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            switch (mode) {
+                case Configuration.UI_MODE_NIGHT_NO: // 当前是白天模式,点击切换到夜间模式
+                    getResources().getConfiguration().uiMode |= Configuration.UI_MODE_NIGHT_YES;
+                    getResources().getConfiguration().uiMode &= ~Configuration.UI_MODE_NIGHT_NO;
+                    break;
+                case Configuration.UI_MODE_NIGHT_YES: // 当前是夜间模式,点击切换到白天模式
+                    getResources().getConfiguration().uiMode |= Configuration.UI_MODE_NIGHT_NO;
+                    getResources().getConfiguration().uiMode &= ~Configuration.UI_MODE_NIGHT_YES;
+                    break;
+            }
             getResources().updateConfiguration(getResources().getConfiguration(), getResources().getDisplayMetrics());
             recreate();
             return true;

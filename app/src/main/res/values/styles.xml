@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--app主题,默认使用亮色主题-->
     <style name="AppTheme.DayNight" parent="AppTheme.Light"/>
+    <!--暗色主题-->
     <style name="AppTheme" parent="android:Theme.DeviceDefault">
         <item name="markdownStyle">@style/Markdown</item>
     </style>
+    <!--亮色主题-->
     <style name="AppTheme.Light" parent="android:Theme.DeviceDefault.Light">
         <item name="markdownStyle">@style/Markdown.Light</item>
     </style>

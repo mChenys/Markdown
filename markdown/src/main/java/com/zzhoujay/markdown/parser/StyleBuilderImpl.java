@@ -36,7 +36,7 @@ import java.lang.ref.WeakReference;
 
 /**
  * Created by zhou on 16-6-28.
- * StyleBuilderImpl
+ * 所有样式的实现类
  */
 public class StyleBuilderImpl implements StyleBuilder {
 
@@ -45,9 +45,9 @@ public class StyleBuilderImpl implements StyleBuilder {
     private static final float scale_h3 = 1.5f;
     private static final float scale_h4 = 1.25f;
     private static final float scale_h5 = 1, scale_h6 = 1;
-    private static final float scale_normal = 1;
+    private static final float scale_normal = 1; // 1倍字号大小
 
-    private final int h1_text_color;
+    private final int h1_text_color; // h1~h5的字体颜色
     private final int h6_text_color;
     private final int quota_color;
     private final int quota_text_color;
@@ -100,6 +100,11 @@ public class StyleBuilderImpl implements StyleBuilder {
         return builder;
     }
 
+    /**
+     * 斜体样式
+     * @param charSequence
+     * @return
+     */
     @Override
     public SpannableStringBuilder italic(CharSequence charSequence) {
         SpannableStringBuilder builder = SpannableStringBuilder.valueOf(charSequence);

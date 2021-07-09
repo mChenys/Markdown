@@ -12,10 +12,12 @@ import java.util.regex.Pattern;
 
 /**
  * Created by zhou on 16-7-10.
- * TagHandlerImpl
+ * 标签处理实现类
  */
 public class TagHandlerImpl implements TagHandler {
-
+    /**
+     * 所有匹配规则
+     */
     private static final Matcher matcherH1_2 = Pattern.compile("^\\s*=+\\s*$").matcher("");
     private static final Matcher matcherH2_2 = Pattern.compile("^\\s*-+\\s*$").matcher("");
 
@@ -35,7 +37,7 @@ public class TagHandlerImpl implements TagHandler {
     private static final Matcher matcherEm = Pattern.compile("[^*_]*(([*_])\\2([^*_].*?)\\2\\2)").matcher("");
     private static final Matcher matcherEmItalic = Pattern.compile("[^*_]*(([*_])\\2\\2([^*_].*?)\\2\\2\\2)").matcher("");
     private static final Matcher matcherDelete = Pattern.compile("[^~]*((~{2,4})([^~].*?)\\2)").matcher("");
-    private static final Matcher matcherCode = Pattern.compile("[^`]*((`+)([^`].*?)\\2)").matcher("");
+    private static final Matcher matcherCode = Pattern.compile("[^`]*((`+)([^`].*?)\\2)").matcher(""); // 匹配 `代码`
 
     private static final Matcher matcherLink = Pattern.compile(".*?(\\[\\s*(.*?)\\s*]\\(\\s*(\\S*?)(\\s+(['\"])(.*?)\\5)?\\s*?\\))").matcher("");
     private static final Matcher matcherImage = Pattern.compile(".*?(!\\[\\s*(.*?)\\s*]\\(\\s*(\\S*?)(\\s+(['\"])(.*?)\\5)?\\s*?\\))").matcher("");
@@ -47,18 +49,21 @@ public class TagHandlerImpl implements TagHandler {
     private static final Matcher matcherEmail = Pattern.compile(".*?(<(\\S+@\\S+\\.\\S+)>).*?").matcher("");
     private static final Matcher matcherAutoLink = Pattern.compile("((https|http|ftp|rtsp|mms)?://)[^\\s]+").matcher("");
 
-    private static final Matcher matcherEndSpace = Pattern.compile("(.*?) {2} *$").matcher("");
+    private static final Matcher matcherEndSpace = Pattern.compile("(.*?) {2} *$").matcher(""); // 2个空格结尾?
     private static final Matcher matcherInlineSpace = Pattern.compile("\\S*(\\s+)\\S+").matcher("");
 
     private static final Matcher matcherCodeBlock = Pattern.compile("^( {4}|\\t)(.*)").matcher("");
     private static final Matcher matcherCodeBlock2 = Pattern.compile("^\\s*```").matcher("");
-
+    // 匹配空白行
     private static final Matcher matcherBlankLine = Pattern.compile("^\\s*$").matcher("");
 
     private static final Matcher matcherGap = Pattern.compile("^\\s*([-*]\\s*){3,}$").matcher("");
 
     private static final SparseArray<Matcher> matchers = new SparseArray<>();// matcher缓冲区
 
+    /**
+     * 将匹配规则添加到matchers中
+     */
     static {
         matchers.put(Tag.CODE_BLOCK_1, matcherCodeBlock);
         matchers.put(Tag.CODE_BLOCK_2, matcherCodeBlock2);
@@ -92,8 +97,8 @@ public class TagHandlerImpl implements TagHandler {
         matchers.put(Tag.CODE, matcherCode);
     }
 
-    private StyleBuilder styleBuilder;
-    private QueueProvider queueProvider;
+    private StyleBuilder styleBuilder; // 样式处理类,具体实现类如:StyleBuilderImpl
+    private QueueProvider queueProvider; // 用来获取行队列的接口
     private HashMap<String, Pair<String, String>> idLinkLinks;
     private HashMap<String, Pair<String, String>> idImageUrl;
 
@@ -113,10 +118,10 @@ public class TagHandlerImpl implements TagHandler {
     public boolean h1(Line line) {
         Matcher matcher = obtain(Tag.H1, line.getSource());
         if (matcher != null && matcher.find()) {
-            line.setType(Line.LINE_TYPE_H1);
+            line.setType(Line.LINE_TYPE_H1); // 设置行的类型 h1
             line.setStyle(SpannableStringBuilder.valueOf(matcher.group(1)));
             inline(line);
-            line.setStyle(styleBuilder.h1(line.getStyle()));
+            line.setStyle(styleBuilder.h1(line.getStyle())); // 设置行的样式
             return true;
         }
         return false;
@@ -563,7 +568,9 @@ public class TagHandlerImpl implements TagHandler {
     @Override
     public boolean code(Line line) {
         line = line.get();
+        // 获取当前行的SpannableStringBuilder
         SpannableStringBuilder builder = (SpannableStringBuilder) line.getStyle();
+        // 重新构建Matcher
         Matcher matcher = obtain(Tag.CODE, builder);
         if (matcher.find()) {
             String content = matcher.group(3);
@@ -802,6 +809,11 @@ public class TagHandlerImpl implements TagHandler {
         return false;
     }
 
+    /**
+     * 是否有tag存在目标行
+     * @param line
+     * @return
+     */
     @Override
     public boolean inline(Line line) {
         boolean flag = code(line);
@@ -818,11 +830,23 @@ public class TagHandlerImpl implements TagHandler {
         return flag;
     }
 
+    /**
+     * 检查对应tag是否存在目标行内
+     * @param tag  Tag Id
+     * @param line line
+     * @return
+     */
     @Override
     public boolean find(int tag, Line line) {
         return line != null && find(tag, line.getSource());
     }
 
+    /**
+     * 检查对应tag是否存在字符串中
+     * @param tag  Tag Id
+     * @param line line
+     * @return
+     */
     @Override
     public boolean find(int tag, String line) {
         if (line == null) {
@@ -832,17 +856,31 @@ public class TagHandlerImpl implements TagHandler {
         return m != null && m.find();
     }
 
+    /**
+     * 检查对应tag在目标行出现的次数
+     * @param tag   tag id
+     * @param line  line
+     * @param group group
+     * @return
+     */
     @Override
     public int findCount(int tag, Line line, int group) {
         return line == null ? 0 : findCount(tag, line.getSource(), group);
     }
 
+    /**
+     * 检查对应tag在目标字符串出现的次数
+     * @param tag   tag id
+     * @param line  line
+     * @param group group
+     * @return
+     */
     @Override
     public int findCount(int tag, String line, int group) {
         if (line == null) {
             return 0;
         }
-
+        // 构建一个Matcher
         Matcher matcher = obtain(tag, line);
         if (matcher == null) {
             return 0;
@@ -854,6 +892,13 @@ public class TagHandlerImpl implements TagHandler {
         return 0;
     }
 
+    /**
+     * 查询指定的SpannableStringBuilder的[start,end]位置是否存在代码段
+     * @param builder
+     * @param start
+     * @param end
+     * @return true 存在, false 不存在
+     */
     private boolean checkInCode(SpannableStringBuilder builder, int start, int end) {
         CodeSpan[] css = builder.getSpans(0, builder.length(), CodeSpan.class);
         for (CodeSpan cs : css) {
@@ -866,9 +911,16 @@ public class TagHandlerImpl implements TagHandler {
         return false;
     }
 
+    /**
+     * 按tag获取对应的匹配器
+     * @param tag
+     * @param src
+     * @return
+     */
     private Matcher obtain(int tag, CharSequence src) {
         Matcher m = matchers.get(tag, null);
         if (m != null) {
+            // 关联匹配的字符串
             m.reset(src);
         }
         return m;

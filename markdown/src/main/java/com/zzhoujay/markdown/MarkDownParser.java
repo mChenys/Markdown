@@ -24,12 +24,13 @@ import java.util.regex.Pattern;
 
 /**
  * Created by zhou on 16-6-25.
+ * MarkDown解析器
  */
 class MarkDownParser {
 
 
-    private BufferedReader reader;
-    private TagHandler tagHandler;
+    private BufferedReader reader; // 读入流
+    private TagHandler tagHandler; // 标签处理,实现类TagHandlerImpl
 
     MarkDownParser(BufferedReader reader, StyleBuilder styleBuilder) {
         this.reader = reader;
@@ -44,8 +45,13 @@ class MarkDownParser {
         this(new BufferedReader(new StringReader(text == null ? "" : text)), styleBuilder);
     }
 
-
+    /**
+     * 开始解析
+     * @return
+     * @throws IOException
+     */
     public Spannable parse() throws IOException {
+        // 获取所有的行队列
         LineQueue queue = collect();
         return parse(queue);
     }
@@ -57,16 +63,19 @@ class MarkDownParser {
      * @throws IOException
      */
     private LineQueue collect() throws IOException {
-        String line;
+        String line; // 每一行
         Line root = null;
         LineQueue queue = null;
         while ((line = reader.readLine()) != null) {
             if (!(tagHandler.imageId(line) || tagHandler.linkId(line))) {
-                Line l = new Line(line);
+                // 排除图片和链接
+                Line l = new Line(line); // 封装每一行文本
                 if (root == null) {
+                    // 第一行
                     root = l;
                     queue = new LineQueue(root);
                 } else {
+                    // 添加其他行
                     queue.append(l);
                 }
             }
@@ -84,26 +93,29 @@ class MarkDownParser {
         if (queue == null) {
             return null;
         }
+        // 关联LineQueue
         tagHandler.setQueueProvider(new QueueConsumer.QueueProvider() {
             @Override
             public LineQueue getQueue() {
                 return queue;
             }
         });
+        // 先移除开头的空行
         removeCurrBlankLine(queue);
         if (queue.empty()) {
             return null;
         }
         boolean notBlock;// 当前Line不是CodeBlock
         do {
-
+            // 优先排除有序和无序列表
             notBlock = queue.prevLine() != null && (queue.prevLine().getType() == Line.LINE_TYPE_OL || queue.prevLine().getType() == Line.LINE_TYPE_UL)
                     && (tagHandler.find(Tag.UL, queue.currLine()) || tagHandler.find(Tag.OL, queue.currLine()));
-            // 处理CodeBlock
+            // 排除CodeBlock
             if (!notBlock && (tagHandler.codeBlock1(queue.currLine()) || tagHandler.codeBlock2(queue.currLine()))) {
                 continue;
             }
             // 合并未换行的Line，并处理一些和Quota嵌套相关的问题
+            //
             boolean isNewLine = tagHandler.find(Tag.NEW_LINE, queue.currLine()) || tagHandler.find(Tag.GAP, queue.currLine()) || tagHandler.find(Tag.H, queue.currLine());
             if (isNewLine) {
                 if (queue.nextLine() != null)
@@ -111,23 +123,29 @@ class MarkDownParser {
                 removeNextBlankLine(queue);
             } else {
                 while (queue.nextLine() != null && !removeNextBlankLine(queue)) {
+                    // 如果nextLine是非空白行进入循环
                     if (tagHandler.find(Tag.CODE_BLOCK_1, queue.nextLine()) || tagHandler.find(Tag.CODE_BLOCK_2, queue.nextLine()) ||
                             tagHandler.find(Tag.GAP, queue.nextLine()) || tagHandler.find(Tag.UL, queue.nextLine()) ||
                             tagHandler.find(Tag.OL, queue.nextLine()) || tagHandler.find(Tag.H, queue.nextLine())) {
+                        // 是代码块,列表,标题,分割线则不处理
                         break;
                     }
+                    // 处理引用嵌套问题
                     if (handleQuotaRelevant(queue, false)) break;
                 }
+                // 移除next的空白行
                 removeNextBlankLine(queue);
             }
-            // 解析style
+            // 解析style, 排除当前行是分割线/引用/列表/标题的情况
             if (tagHandler.gap(queue.currLine()) || tagHandler.quota(queue.currLine()) || tagHandler.ol(queue.currLine()) ||
                     tagHandler.ul(queue.currLine()) || tagHandler.h(queue.currLine())) {
                 continue;
             }
+            // 设置当前行的样式,将当前行字符串封装成SpannableStringBuilder
             queue.currLine().setStyle(SpannableStringBuilder.valueOf(queue.currLine().getSource()));
             tagHandler.inline(queue.currLine());
-        } while (queue.next());
+        } while (queue.next()); // 循环遍历所有行
+        // 合并LineQueue中的所有行,并返回Spannable
         return merge(queue);
     }
 
@@ -273,6 +291,7 @@ class MarkDownParser {
         boolean flag = false;
         while (queue.currLine() != null) {
             if (tagHandler.find(Tag.BLANK, queue.currLine())) {
+                // 如果当前行是空白行,直接删除
                 queue.removeCurrLine();
                 flag = true;
             } else {

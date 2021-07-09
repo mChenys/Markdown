@@ -7,7 +7,7 @@ import android.text.style.StyleSpan;
 
 /**
  * Created by zhou on 2016/11/10.
- * FontSpan
+ * FontSpan 字体span,支持颜色/大小/样式设置
  */
 @SuppressLint("ParcelCreator")
 public class FontSpan extends StyleSpan implements ParcelableSpan {

@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 /**
  * Created by zhou on 16-6-25.
- * Markdown解析器
+ * Markdown入口
  */
 public class MarkDown {
 

@@ -7,7 +7,9 @@ import android.text.SpannableStringBuilder;
  * 代表每一行文本
  */
 public class Line {
-
+    /**
+     * 支持的行类型
+     */
     public static final int LINE_NORMAL = 0; // 普通文本
     public static final int LINE_TYPE_QUOTA = 1; // 引用
     public static final int LINE_TYPE_UL = 2; // 无序列表
@@ -58,6 +60,10 @@ public class Line {
         this.source = source;
     }
 
+    /**
+     * 获取源字符串文本
+     * @return
+     */
     public String getSource() {
         return source;
     }
@@ -141,18 +147,25 @@ public class Line {
             next = null;
         } else {
             if (line.next != null) {
+                // 如果待添加行的next有值,则将next的prev断开
                 line.next.prev = null;
             }
+            // 将待添加的行的next指向当前行的next
             line.next = next;
             if (next != null) {
+                // 修改当前行的next的prev节点为待添加行
                 next.prev = line;
             }
             if (line.prev != null) {
+                // 如果待添加行的prev节点有值,则将prev节点的next断开
                 line.prev.next = null;
             }
+            // 让待添加行的prev节点指向当前行
             line.prev = this;
+            // 让当前行的next节点指向待添加行
             next = line;
             if (child != null) {
+                // 让当前行的child节点添加待添加行的child节点
                 child.addNext(line.child);
             }
         }
@@ -210,18 +223,24 @@ public class Line {
     }
 
     /**
-     * 移除当前节点，重新连上前后两个节点，包括其子节点（不会导致链表断开）
+     * 移除当前curr节点，重新连上前后两个节点，包括其子节点（不会导致链表断开）
+     * before: prev <- curr <- next
+     * after: prev <- next
      */
     private void reduce() {
         if (child != null) {
+            // 将curr的child移除
             child.reduce();
         }
         if (prev != null) {
+            // prev的next指向curr的next
             prev.next = next;
         }
         if (next != null) {
+            // next的prev指向curr的prev
             next.prev = prev;
         }
+        // 清空curr的next和prev
         next = null;
         prev = null;
     }

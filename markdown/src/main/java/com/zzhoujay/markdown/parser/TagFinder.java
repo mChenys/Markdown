@@ -7,7 +7,7 @@ package com.zzhoujay.markdown.parser;
 public interface TagFinder {
 
     /**
-     * 检查对应tag是否存在
+     * 检查对应tag是否存在目标行内
      *
      * @param tag  Tag Id
      * @param line line
@@ -16,7 +16,7 @@ public interface TagFinder {
     boolean find(int tag, Line line);
 
     /**
-     * 检查对应tag是否存在
+     * 检查对应tag是否存在字符串中
      *
      * @param tag  Tag Id
      * @param line line

@@ -30,9 +30,9 @@ public class Tag {
     public static final int IMAGE2 = 21;
     public static final int IMAGE_ID = 22;
     public static final int H = 23;
-    public static final int BLANK = 25;
+    public static final int BLANK = 25; // 空白字符
     public static final int NEW_LINE = 26;
-    public static final int GAP = 27;
+    public static final int GAP = 27; // 表示分割线 - - - 或者 * * *
     public static final int H1_2 = 28;
     public static final int H2_2 = 29;
     public static final int CODE = 30;

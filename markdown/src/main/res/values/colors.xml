@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--亮色主题的文本颜色-->
     <color name="markdown_h1_text_color_light">#df000000</color>
     <color name="markdown_h6_text_color_light">#8a000000</color>
     <color name="markdown_quota_color_light">#4037474f</color>
@@ -9,6 +10,7 @@
     <color name="markdown_link_color_light">#dc3e7bc9</color>
     <color name="markdown_underline_color_light">#1837474f</color>
 
+    <!--暗色主题的文本颜色-->
     <color name="markdown_h1_color_dark">#ffffffff</color>
     <color name="markdown_h6_color_dark">#b3ffffff</color>
     <color name="markdown_quota_color_dark">#40fafafa</color>
