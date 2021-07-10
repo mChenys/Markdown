@@ -107,7 +107,7 @@ class MarkDownParser {
         }
         boolean notBlock;// 当前Line不是CodeBlock
         do {
-            // 优先排除有序和无序列表
+            // 优先排除前一行是有序和无序列表
             notBlock = queue.prevLine() != null && (queue.prevLine().getType() == Line.LINE_TYPE_OL || queue.prevLine().getType() == Line.LINE_TYPE_UL)
                     && (tagHandler.find(Tag.UL, queue.currLine()) || tagHandler.find(Tag.OL, queue.currLine()));
             // 排除CodeBlock
@@ -115,7 +115,7 @@ class MarkDownParser {
                 continue;
             }
             // 合并未换行的Line，并处理一些和Quota嵌套相关的问题
-            //
+            // 如果当前行是标题/分割线/缩进则当做新行
             boolean isNewLine = tagHandler.find(Tag.NEW_LINE, queue.currLine()) || tagHandler.find(Tag.GAP, queue.currLine()) || tagHandler.find(Tag.H, queue.currLine());
             if (isNewLine) {
                 if (queue.nextLine() != null)
@@ -127,7 +127,7 @@ class MarkDownParser {
                     if (tagHandler.find(Tag.CODE_BLOCK_1, queue.nextLine()) || tagHandler.find(Tag.CODE_BLOCK_2, queue.nextLine()) ||
                             tagHandler.find(Tag.GAP, queue.nextLine()) || tagHandler.find(Tag.UL, queue.nextLine()) ||
                             tagHandler.find(Tag.OL, queue.nextLine()) || tagHandler.find(Tag.H, queue.nextLine())) {
-                        // 是代码块,列表,标题,分割线则不处理
+                        // 下一行是代码块,列表,标题,分割线则不处理
                         break;
                     }
                     // 处理引用嵌套问题
@@ -136,13 +136,14 @@ class MarkDownParser {
                 // 移除next的空白行
                 removeNextBlankLine(queue);
             }
-            // 解析style, 排除当前行是分割线/引用/列表/标题的情况
+            // 解析style, 排除当前行是分割线/引用/列表/标题的情况,在排除的过程中就设置了当前行的样式了
             if (tagHandler.gap(queue.currLine()) || tagHandler.quota(queue.currLine()) || tagHandler.ol(queue.currLine()) ||
                     tagHandler.ul(queue.currLine()) || tagHandler.h(queue.currLine())) {
                 continue;
             }
             // 设置当前行的样式,将当前行字符串封装成SpannableStringBuilder
             queue.currLine().setStyle(SpannableStringBuilder.valueOf(queue.currLine().getSource()));
+            // 设置当前行的样式
             tagHandler.inline(queue.currLine());
         } while (queue.next()); // 循环遍历所有行
         // 合并LineQueue中的所有行,并返回Spannable
@@ -157,13 +158,16 @@ class MarkDownParser {
      * @return true：已处理
      */
     private boolean handleQuotaRelevant(LineQueue queue, boolean onlyH) {
+        // 获取下一行开头的>个数,例如下一行是"> > > 555",那么开头的>个数就是3
         int nextQuotaCount = tagHandler.findCount(Tag.QUOTA, queue.nextLine(), 1);
         int currQuotaCount = tagHandler.findCount(Tag.QUOTA, queue.currLine(), 1);
         if (nextQuotaCount > 0 && nextQuotaCount > currQuotaCount) {
+            // 下一行的引用个数大于当前行,不用处理
             return true;
         } else {
             String source = queue.nextLine().getSource();
             if (nextQuotaCount > 0) {
+                // 如果下一行开头也有引用,且>号数量少于上一行,那么需要将下一行的开头>号去掉
                 source = source.replaceFirst("^\\s{0,3}(>\\s+){" + nextQuotaCount + "}", "");
             }
             if (currQuotaCount == nextQuotaCount) {
@@ -176,7 +180,9 @@ class MarkDownParser {
             if (tagHandler.find(Tag.UL, source) || tagHandler.find(Tag.OL, source) || tagHandler.find(Tag.H, source)) {
                 return true;
             } else {
+                // 将当前行和下一行处理后的内容合并在当前行
                 queue.currLine().setSource(queue.currLine().getSource() + ' ' + source);
+                // 移除下一行
                 queue.removeNextLine();
             }
         }

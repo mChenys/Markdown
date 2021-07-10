@@ -181,7 +181,9 @@ public class StyleBuilderImpl implements StyleBuilder {
     public SpannableStringBuilder quota(CharSequence charSequence) {
         SpannableStringBuilder spannableStringBuilder = SpannableStringBuilder.valueOf(charSequence);
         QuoteSpan span = new MarkDownQuoteSpan(quota_color);
+        // 添加引用span
         spannableStringBuilder.setSpan(span, 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        // 添加前景色span
         spannableStringBuilder.setSpan(new ForegroundColorSpan(quota_text_color), 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return spannableStringBuilder;
     }

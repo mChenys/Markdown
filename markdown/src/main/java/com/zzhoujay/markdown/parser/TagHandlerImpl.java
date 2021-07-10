@@ -15,9 +15,11 @@ import java.util.regex.Pattern;
  * 标签处理实现类
  */
 public class TagHandlerImpl implements TagHandler {
-    /**
-     * 所有匹配规则
-     */
+
+
+    // =号开头 xxx
+    // yyy,这里面的内容包括xxx都会当做标题2处理
+    // -号结尾
     private static final Matcher matcherH1_2 = Pattern.compile("^\\s*=+\\s*$").matcher("");
     private static final Matcher matcherH2_2 = Pattern.compile("^\\s*-+\\s*$").matcher("");
 
@@ -57,7 +59,7 @@ public class TagHandlerImpl implements TagHandler {
     // 匹配空白行
     private static final Matcher matcherBlankLine = Pattern.compile("^\\s*$").matcher("");
 
-    private static final Matcher matcherGap = Pattern.compile("^\\s*([-*]\\s*){3,}$").matcher("");
+    private static final Matcher matcherGap = Pattern.compile("^\\s*([-*]\\s*){3,}$").matcher(""); // 分割线,如:- - - 或者 * * *
 
     private static final SparseArray<Matcher> matchers = new SparseArray<>();// matcher缓冲区
 
@@ -203,14 +205,14 @@ public class TagHandlerImpl implements TagHandler {
 
         Matcher matcher = obtain(Tag.QUOTA, line.getSource());
         if (matcher.find()) {
-            line.setType(Line.LINE_TYPE_QUOTA);
-            Line child = line.createChild(matcher.group(1));
+            line.setType(Line.LINE_TYPE_QUOTA); // 标记类型
+            Line child = line.createChild(matcher.group(1));// 创建子节点,即文本节点,或者带>的文本
             line.attachChildToNext();
             line.attachChildToPrev();
 
             Line prev = queue.prevLine();
             if (line.parentLine() == null && prev != null && prev.getType() == Line.LINE_TYPE_QUOTA) {
-                SpannableStringBuilder style = new SpannableStringBuilder(" ");
+                SpannableStringBuilder style = new SpannableStringBuilder(" "); // 如果前一行也是引用则进来
                 styleBuilder.quota(style);
                 while (prev.childLine() != null && prev.childLine().getType() == Line.LINE_TYPE_QUOTA) {
                     prev = prev.childLine();
@@ -237,11 +239,11 @@ public class TagHandlerImpl implements TagHandler {
                     return true;
                 }
             } else {
-                child.setStyle(SpannableStringBuilder.valueOf(child.getSource()));
+                child.setStyle(SpannableStringBuilder.valueOf(child.getSource())); // 初始化子节点的style为SpannableStringBuilder
                 inline(child);
             }
 
-            line.setStyle(styleBuilder.quota(child.getStyle()));
+            line.setStyle(styleBuilder.quota(child.getStyle())); // 给当前行设置引用span
             return true;
         }
         return false;

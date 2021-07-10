@@ -8,7 +8,7 @@ import android.text.SpannableStringBuilder;
  */
 public class Line {
     /**
-     * 支持的行类型
+     * 支持的行类型type
      */
     public static final int LINE_NORMAL = 0; // 普通文本
     public static final int LINE_TYPE_QUOTA = 1; // 引用
@@ -29,11 +29,11 @@ public class Line {
     private Line prev; // 前一个节点
     private Line next; // 下一个节点
     private Line parent; // 父节点
-    private Line child; // 子节点
+    private Line child; // 子节点,如文本节点
 
     private String source; // 源文本
     private CharSequence style; // 样式
-    private int type; // 种类
+    private int type; // 类型标识
     private int count; // 数量
     private int attr; // 属性
     private int handle; // 0
@@ -283,32 +283,32 @@ public class Line {
     /**
      * 添加子节点，并将子节点和前后节点的子节点建立连接
      *
-     * @param line child
+     * @param line child 子节点,例如文本节点
      */
     public void addChild(Line line) {
         if (child != null) {
-            child.parent = null;
+            child.parent = null; // 如果当前行已经有child,先断开child的parent
         }
-        child = line;
+        child = line; // 重新赋值当前行的child为该子节点
         if (line.parent != null) {
-            line.parent.child = null;
+            line.parent.child = null; // 如果子节点的已经有了parent,将子节点的parent与子节点断开
         }
-        line.parent = this;
+        line.parent = this; // 重新设置子节点的parent为当前行
         attachChildToNext();
         attachChildToPrev();
     }
 
     /**
-     * 将子节点和下一个节点之间建立连接
+     * 将子节点的next和当前行的下一个节点的child之间建立连接
      */
     public void attachChildToNext() {
         if (child != null && next != null) {
             if (child.next != null) {
-                child.next.prev = null;
+                child.next.prev = null; // 如果子节点的next节点已存在,那么和它断开
             }
-            child.next = next.child;
+            child.next = next.child; // 将子节点的next节点赋值为next节点的child节点
             if (next.child != null) {
-                if (next.child.prev != null) {
+                if (next.child.prev != null) {  // 如果当前节点的next节点的child节点的前一个节点存在,那么断开
                     next.child.prev.next = null;
                 }
                 next.child.prev = child;
@@ -318,19 +318,19 @@ public class Line {
     }
 
     /**
-     * 将子节点和上一个节点之间建立连接
+     * 将子节点prev和上一个节点的child之间建立连接
      */
     public void attachChildToPrev() {
         if (child != null && prev != null) {
             if (child.prev != null) {
-                child.prev.next = null;
+                child.prev.next = null; // 如果子节点的prev节点存在,那么先断开
             }
-            child.prev = prev.child;
+            child.prev = prev.child; // 将子节点的prev节点赋值为prev节点的child节点
             if (prev.child != null) {
                 if (prev.child.next != null) {
-                    prev.child.next.prev = null;
+                    prev.child.next.prev = null; // 断开prev节点的child的next节点
                 }
-                prev.child.next = child;
+                prev.child.next = child; // 将当前子节点赋值给prev节点的child的next节点
             }
             child.attachChildToPrev();
         }
@@ -357,7 +357,7 @@ public class Line {
     }
 
     /**
-     * 创建一个子节点
+     * 创建一个子节点,例如文本节点
      *
      * @param src 子节点的source
      * @return 子节点
@@ -378,14 +378,14 @@ public class Line {
         if (parent != null) {
             p = parent.copyToNext();
         }
-        Line line = new Line(this);
+        Line line = new Line(this); // 基于当前行创建新行
         if (p == null) {
             line.next = next;
             if (next != null) {
                 next.prev = line;
             }
-            line.prev = this;
-            next = line;
+            line.prev = this; // 将新行的prev节点设置当前行
+            next = line; // 将当前行的next设置为新行
         } else {
             p.addChild(line);
         }

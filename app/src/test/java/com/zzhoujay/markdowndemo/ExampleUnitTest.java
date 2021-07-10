@@ -29,12 +29,39 @@ public class ExampleUnitTest {
 
     @Test
     public void testMatch2() {
-        Matcher matcher = Pattern.compile("[^*_]*(([*_])([^*_].*?)\\2)").matcher("*_斜__体样式");
+        Matcher matcher = Pattern.compile("^\\s{0,3}>\\s(.*)").matcher("> 11   > 22");
         while (matcher.find()) {
-            int start = matcher.start(1); // 0
-            int end = matcher.end(1); // 4
-            String group = matcher.group(); // _斜_
+            int start = matcher.start(1);//2
+            int end = matcher.end(1);//11
+            String group = matcher.group(1); // 11   > 22
             System.out.println("start:" + start + ",end:" + end + ",group:" + group);
         }
     }
+
+    @Test
+    public void testMatch3() {
+        int count = findCount("> > > 555", 1);//count:3
+        System.out.println("count:" + count);//3
+    }
+
+    @Test
+    public void testMatch4() {
+        String source = "> > > 3    > 4";
+        source = source.replaceFirst("^\\s{0,3}(>\\s+){3}", "");
+        System.out.println("source:" + source);
+    }
+
+    public int findCount(String line, int group) {
+        System.out.println("findCount====>line:" + line);
+        if (line == null) {
+            return 0;
+        }
+        // 构建一个Matcher
+        Matcher matcher = Pattern.compile("^\\s{0,3}>\\s(.*)").matcher(line);
+        if (matcher.find()) {
+            return findCount(matcher.group(group), group) + 1;
+        }
+        return 0;
+    }
+
 }
