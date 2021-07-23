@@ -107,7 +107,7 @@ class MarkDownParser {
         }
         boolean notBlock;// 当前Line不是CodeBlock
         do {
-            // 优先排除前一行是有序和无序列表
+            // 前一行是有序和无序列表且当前行也是
             notBlock = queue.prevLine() != null && (queue.prevLine().getType() == Line.LINE_TYPE_OL || queue.prevLine().getType() == Line.LINE_TYPE_UL)
                     && (tagHandler.find(Tag.UL, queue.currLine()) || tagHandler.find(Tag.OL, queue.currLine()));
             // 排除CodeBlock
@@ -116,7 +116,9 @@ class MarkDownParser {
             }
             // 合并未换行的Line，并处理一些和Quota嵌套相关的问题
             // 如果当前行是标题/分割线/缩进则当做新行
-            boolean isNewLine = tagHandler.find(Tag.NEW_LINE, queue.currLine()) || tagHandler.find(Tag.GAP, queue.currLine()) || tagHandler.find(Tag.H, queue.currLine());
+            boolean isNewLine = tagHandler.find(Tag.NEW_LINE, queue.currLine())
+                    || tagHandler.find(Tag.GAP, queue.currLine())
+                    || tagHandler.find(Tag.H, queue.currLine());
             if (isNewLine) {
                 if (queue.nextLine() != null)
                     handleQuotaRelevant(queue, true);

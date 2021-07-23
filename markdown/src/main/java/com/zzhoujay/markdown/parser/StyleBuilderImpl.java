@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
@@ -285,12 +286,20 @@ public class StyleBuilderImpl implements StyleBuilder {
         return spannableStringBuilder;
     }
 
+    /**
+     * 待下划线的标题
+     * @param charSequence
+     * @param s
+     * @return
+     */
     private SpannableStringBuilder hWithUnderLine(CharSequence charSequence, float s) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(charSequence);
         int start = 0;
         FontSpan fontSpan = new FontSpan(s, Typeface.BOLD, h1_text_color);
+        // 设置字体span
         spannableStringBuilder.setSpan(fontSpan, 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         Drawable underLine = new ColorDrawable(h_under_line_color);
+
         UnderLineSpan underLineSpan = new UnderLineSpan(underLine, getTextViewRealWidth(), 5);
         spannableStringBuilder.append('\n');
         start += charSequence.length() + 1;

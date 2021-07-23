@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
                         try {
                             drawable = drawableFromUrl(source);
                             drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             Log.w(TAG, "can't get image", e);
                             drawable = new ColorDrawable(Color.LTGRAY);
                             drawable.setBounds(0, 0, mTextView.getWidth() - mTextView.getPaddingLeft() - mTextView.getPaddingRight(), 400);

@@ -58,8 +58,8 @@ public class LongPressLinkMovementMethod extends LinkMovementMethod {
             switch (msg.what) {
                 case LONG_PRESS:
                     dispatchLongPress(
-                            (LongPressClickableSpan)    ((Object[]) msg.obj)[0],
-                            (TextView)                  ((Object[]) msg.obj)[1]);
+                            (LongPressClickableSpan) ((Object[]) msg.obj)[0],
+                            (TextView) ((Object[]) msg.obj)[1]);
                     break;
             }
         }
